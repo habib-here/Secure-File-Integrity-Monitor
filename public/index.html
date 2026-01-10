@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Monitor Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e4e4e7;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #a1a1aa;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-running {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .status-stopped {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6464;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-running .status-dot {
+            background: #00ff88;
+        }
+
+        .status-stopped .status-dot {
+            background: #ff6464;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #00d9ff;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #a1a1aa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e4e4e7;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6464;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 100, 100, 0.3);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .downloads-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .downloads-table th,
+        .downloads-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .downloads-table th {
+            background: rgba(0, 0, 0, 0.2);
+            font-weight: 500;
+            color: #a1a1aa;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .downloads-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .file-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .file-status.completed {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .file-status.pending {
+            background: rgba(255, 200, 0, 0.2);
+            color: #ffc800;
+        }
+
+        .file-status.failed {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6464;
+        }
+
+        .file-status.downloading {
+            background: rgba(0, 217, 255, 0.2);
+            color: #00d9ff;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: #e4e4e7;
+            font-size: 0.95rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #00d9ff;
+        }
+
+        .input-group input::placeholder {
+            color: #71717a;
+        }
+
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #71717a;
+            margin-right: 10px;
+        }
+
+        .log-success {
+            color: #00ff88;
+        }
+
+        .log-error {
+            color: #ff6464;
+        }
+
+        .log-info {
+            color: #00d9ff;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .config-label {
+            color: #a1a1aa;
+            font-size: 0.9rem;
+        }
+
+        .config-value {
+            color: #e4e4e7;
+            font-weight: 500;
+            word-break: break-all;
+            max-width: 60%;
+            text-align: right;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #71717a;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00d9ff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📁 File Monitor Dashboard</h1>
+            <p class="subtitle">Automated file monitoring and download system</p>
+        </header>
+
+        <div class="grid">
+            <!-- Monitor Status Card -->
+            <div class="card">
+                <h2>
+                    Monitor Status
+                    <span id="statusBadge" class="status-badge status-stopped">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Stopped</span>
+                    </span>
+                </h2>
+                
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div id="totalDownloads" class="stat-value">0</div>
+                        <div class="stat-label">Total Downloads</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="pendingDownloads" class="stat-value">0</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="completedDownloads" class="stat-value">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="failedDownloads" class="stat-value">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button id="btnStart" class="btn btn-primary" onclick="startMonitor()">
+                        ▶ Start
+                    </button>
+                    <button id="btnStop" class="btn btn-danger" onclick="stopMonitor()">
+                        ⏹ Stop
+                    </button>
+                    <button class="btn btn-secondary" onclick="manualCheck()">
+                        🔄 Check Now
+                    </button>
+                </div>
+            </div>
+
+            <!-- Configuration Card -->
+            <div class="card">
+                <h2>⚙️ Configuration</h2>
+                
+                <div class="config-item">
+                    <span class="config-label">Monitor URL</span>
+                    <span id="monitorUrl" class="config-value">-</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Poll Interval</span>
+                    <span id="pollInterval" class="config-value">-</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Last Check</span>
+                    <span id="lastCheck" class="config-value">Never</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Discovered Files</span>
+                    <span id="discoveredCount" class="config-value">0</span>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="clearCache()">
+                        🗑 Clear Cache
+                    </button>
+                    <button class="btn btn-secondary" onclick="retryFailed()">
+                        ↻ Retry Failed
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Download Card -->
+        <div class="card" style="margin-bottom: 20px;">
+            <h2>📥 Manual Download</h2>
+            <div class="input-group">
+                <input type="text" id="downloadUrl" placeholder="Enter file URL to download...">
+                <button class="btn btn-primary" onclick="manualDownload()">
+                    Download
+                </button>
+            </div>
+        </div>
+
+        <!-- Downloads Table Card -->
+        <div class="card">
+            <h2>📋 Recent Downloads</h2>
+            <div id="downloadsContainer">
+                <table class="downloads-table">
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Size</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="downloadsBody">
+                        <tr>
+                            <td colspan="4" class="empty-state">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Activity Log Card -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>📝 Activity Log</h2>
+            <div id="logContainer" class="log-container">
+                <div class="log-entry">
+                    <span class="log-time">[--:--:--]</span>
+                    <span class="log-info">Waiting for activity...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        const logs = [];
+        const MAX_LOGS = 50;
+
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            logs.unshift({ time, message, type });
+            if (logs.length > MAX_LOGS) logs.pop();
+            renderLogs();
+        }
+
+        // Render logs
+        function renderLogs() {
+            const container = document.getElementById('logContainer');
+            container.innerHTML = logs.map(log => `
+                <div class="log-entry">
+                    <span class="log-time">[${log.time}]</span>
+                    <span class="log-${log.type}">${log.message}</span>
+                </div>
+            `).join('');
+        }
+
+        // Fetch monitor status
+        async function fetchStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/monitor/status`);
+                const data = await response.json();
+
+                if (data.success) {
+                    updateStatusUI(data.monitor, data.statistics);
+                }
+            } catch (error) {
+                console.error('Failed to fetch status:', error);
+            }
+        }
+
+        // Update status UI
+        function updateStatusUI(monitor, stats) {
+            const badge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            
+            if (monitor.isRunning) {
+                badge.className = 'status-badge status-running';
+                statusText.textContent = 'Running';
+            } else {
+                badge.className = 'status-badge status-stopped';
+                statusText.textContent = 'Stopped';
+            }
+
+            document.getElementById('totalDownloads').textContent = stats.totalDownloads || 0;
+            document.getElementById('pendingDownloads').textContent = stats.pendingDownloads || 0;
+            document.getElementById('completedDownloads').textContent = stats.completedDownloads || 0;
+            document.getElementById('failedDownloads').textContent = stats.failedDownloads || 0;
+
+            document.getElementById('monitorUrl').textContent = monitor.monitorUrl || '-';
+            document.getElementById('pollInterval').textContent = 
+                monitor.pollInterval ? `${monitor.pollInterval / 1000}s` : '-';
+            document.getElementById('lastCheck').textContent = 
+                monitor.lastCheck ? new Date(monitor.lastCheck).toLocaleString() : 'Never';
+            document.getElementById('discoveredCount').textContent = 
+                monitor.discoveredFilesCount || 0;
+        }
+
+        // Fetch downloads
+        async function fetchDownloads() {
+            try {
+                const response = await fetch(`${API_BASE}/downloads?limit=20`);
+                const data = await response.json();
+
+                if (data.success) {
+                    renderDownloads(data.downloads);
+                }
+            } catch (error) {
+                console.error('Failed to fetch downloads:', error);
+            }
+        }
+
+        // Render downloads table
+        function renderDownloads(downloads) {
+            const tbody = document.getElementById('downloadsBody');
+
+            if (!downloads || downloads.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state">No downloads yet</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = downloads.map(d => `
+                <tr>
+                    <td>${d.filename || 'Unknown'}</td>
+                    <td>${formatSize(d.size)}</td>
+                    <td><span class="file-status ${d.status}">${d.status}</span></td>
+                    <td>${new Date(d.createdAt).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Format file size
+        function formatSize(bytes) {
+            if (!bytes || bytes === 0) return '-';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Start monitor
+        async function startMonitor() {
+            try {
+                const response = await fetch(`${API_BASE}/monitor/start`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('Monitor started', 'success');
+                    fetchStatus();
+                } else {
+                    addLog(`Failed to start: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Stop monitor
+        async function stopMonitor() {
+            try {
+                const response = await fetch(`${API_BASE}/monitor/stop`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('Monitor stopped', 'info');
+                    fetchStatus();
+                } else {
+                    addLog(`Failed to stop: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Manual check
+        async function manualCheck() {
+            addLog('Triggering manual check...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/monitor/check`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog(`Check complete: Found ${data.totalFound} files, ${data.newFiles} new`, 'success');
+                    fetchStatus();
+                    fetchDownloads();
+                } else {
+                    addLog(`Check failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Manual download
+        async function manualDownload() {
+            const input = document.getElementById('downloadUrl');
+            const url = input.value.trim();
+            
+            if (!url) {
+                addLog('Please enter a URL', 'error');
+                return;
+            }
+
+            addLog(`Downloading: ${url}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/downloads`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog(`Downloaded: ${data.filename}`, 'success');
+                    input.value = '';
+                    fetchDownloads();
+                } else {
+                    addLog(`Download failed: ${data.reason || data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Clear cache
+        async function clearCache() {
+            try {
+                const response = await fetch(`${API_BASE}/monitor/clear-cache`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('Cache cleared', 'success');
+                    fetchStatus();
+                }
+            } catch (error) {
+                addLog(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Retry failed downloads
+        async function retryFailed() {
+            addLog('Retrying failed downloads...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/downloads/retry`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog(`Retry complete: ${data.successful} successful, ${data.stillFailed} still failed`, 
+                        data.successful > 0 ? 'success' : 'info');
+                    fetchDownloads();
+                }
+            } catch (error) {
+                addLog(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Handle Enter key on download input
+        document.getElementById('downloadUrl').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                manualDownload();
+            }
+        });
+
+        // Initial load
+        addLog('Dashboard initialized', 'info');
+        fetchStatus();
+        fetchDownloads();
+
+        // Auto-refresh every 10 seconds
+        setInterval(() => {
+            fetchStatus();
+            fetchDownloads();
+        }, 10000);
+    </script>
+</body>
+</html>

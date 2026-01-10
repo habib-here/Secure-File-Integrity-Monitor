@@ -1,0 +1,26 @@
+{
+  "downloads": [
+    {
+      "id": "3ebef09c-86db-41de-8a3b-d9f9bcf591ab",
+      "sourceUrl": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      "filename": "dummy.pdf",
+      "localPath": "D:\\Other Learnings\\new-project\\downloads\\dummy.pdf",
+      "size": 13264,
+      "hash": "2942bfabb3d05332b66eb128e0842cff",
+      "mimeType": "application/pdf; qs=0.001",
+      "status": "completed",
+      "retryCount": 0,
+      "error": null,
+      "createdAt": "2026-01-10T10:32:51.582Z",
+      "completedAt": "2026-01-10T10:32:51.740Z",
+      "metadata": {},
+      "updatedAt": "2026-01-10T10:32:51.740Z"
+    }
+  ],
+  "lastCheck": "2026-01-10T10:52:05.270Z",
+  "statistics": {
+    "totalDownloads": 1,
+    "totalSize": 13264,
+    "failedDownloads": 0
+  }
+}
