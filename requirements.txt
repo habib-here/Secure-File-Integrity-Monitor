@@ -1,0 +1,18 @@
+# Secure File Integrity & Aggregation Agent
+# Production Dependencies
+
+# File system monitoring
+watchdog>=3.0.0
+
+# HTTP client for file downloads
+requests>=2.31.0
+
+# Security: Certificate verification
+certifi>=2023.7.22
+
+# Optional: Enhanced async support
+urllib3>=2.0.0
+
+# Testing (dev dependency)
+pytest>=7.4.0
+pytest-cov>=4.1.0
