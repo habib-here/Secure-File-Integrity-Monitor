@@ -41,10 +41,11 @@ Thumbs.db
 dist/
 build/
 
-# Vercel
+# Vercel (removed from project)
 .vercel/
+vercel.json
+api/
 
 # Temporary files
 tmp/
 temp/
-.vercel
