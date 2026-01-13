@@ -6,26 +6,22 @@ __pycache__/
 .Python
 .pytest_cache/
 *.egg-info/
-dist/
-build/
 eggs/
 .eggs/
 
-# Dependencies
-node_modules/
+# Runtime directories (keep folders via .gitkeep)
+logs/*
+!logs/.gitkeep
+downloads/*
+!downloads/.gitkeep
+data/*
+!data/.gitkeep
+*.log
 
 # Environment files
 .env
 .env.local
 .env.*.local
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-
-# Downloaded files (optional - uncomment to exclude)
-# downloads/
 
 # OS generated files
 .DS_Store
@@ -41,10 +37,15 @@ Thumbs.db
 dist/
 build/
 
-# Vercel (removed from project)
+# Legacy artifacts (removed)
+node_modules/
+package.json
+package-lock.json
 .vercel/
 vercel.json
 api/
+src/
+public/
 
 # Temporary files
 tmp/
