@@ -138,6 +138,19 @@ docker run -d \
 
 ---
 
+## Reliability & Testing
+
+This agent is battle-tested with a comprehensive `pytest` suite covering 24 edge cases, including:
+
+* Race condition handling (rapid file modifications)
+* Atomic logging verification
+* Permission error recovery
+* Large file chunking (memory safety)
+
+![Test Suite Passing](image.png)
+
+---
+
 ## Security Considerations
 
 - **Non-Root Execution**: Container runs as unprivileged `monitor` user
