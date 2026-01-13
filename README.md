@@ -92,6 +92,25 @@ python main.py
 
 ---
 
+## Project Structure
+
+```
+Secure-File-Integrity-Monitor/
+├── main.py              # Orchestrates real-time file monitoring with SHA-256 integrity verification
+├── Dockerfile           # Defines hardened production container with non-root user isolation
+├── requirements.txt     # Specifies Python dependencies (watchdog, requests) with pinned versions
+├── tests/
+│   └── test_core.py     # Validates hash integrity and error handling across 24 automated test cases
+├── .env.example         # Documents configurable runtime parameters (watch paths, timeouts)
+├── data/                # Persists application state and metadata (gitkeep only)
+├── logs/                # Archives immutable audit logs for SIEM ingestion
+├── downloads/           # Quarantines downloaded artifacts for forensic analysis
+├── .gitignore           # Enforces exclusion of runtime data and secrets
+└── LICENSE              # Grants MIT open-source licensing terms
+```
+
+---
+
 ## Configuration
 
 Configure the agent using environment variables:
@@ -197,7 +216,7 @@ MIT License — See [LICENSE](LICENSE) for details.
 
 ## Author
 
-**Security Engineering Team**  
+**Habib Ahmed**  
 Enterprise File Integrity Solutions
 
 ---
